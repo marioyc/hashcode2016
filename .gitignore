@@ -3,6 +3,8 @@
 *.lo
 *.o
 *.obj
+.metadata/*
+.DS_Store 
 
 # Precompiled Headers
 *.gch
