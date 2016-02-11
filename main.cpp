@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <math.h>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ int P,weight[MAXP];
 struct warehouse{
 	int r,c;
 	int p[MAXP];
+	
 }ware[MAXW];
 
 struct order{
@@ -24,7 +26,22 @@ struct order{
 struct drone{
 	int r,c;
 	int p[MAXP];
+	
 }dr[MAXD];
+
+//functions
+int dist( warehouse& w1, warehouse& w2){
+	return ceil(sqrt( ((w1.r-w2.r) * (w1.r-w2.r) )+ ((w1.c-w2.c) * (w1.c-w2.c) ) )); 
+}
+
+int dist( drone& d, warehouse& w){
+	return ceil(sqrt( ((d.r-w.r) * (d.r-w.r) )+ ((d.c-w.c) * (d.c-w.c) ) )); 
+}
+
+int dist( warehouse& w, drone& d){
+	return dist(&d,&w); 
+}
+
 
 int main(){
 	ios::sync_with_stdio(0);
