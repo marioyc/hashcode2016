@@ -29,7 +29,7 @@ struct drone{
 	
 }dr[MAXD];
 
-//functions
+// Euclidian distance Functions 
 int dist( warehouse& w1, warehouse& w2){
 	return ceil(sqrt( ((w1.r-w2.r) * (w1.r-w2.r) )+ ((w1.c-w2.c) * (w1.c-w2.c) ) )); 
 }
@@ -42,6 +42,13 @@ int dist( warehouse& w, drone& d){
 	return dist(&d,&w); 
 }
 
+int dist( drone& d, order& o){
+	return ceil(sqrt( ((d.r-o.r) * (d.r-o.r) )+ ((d.c-o.c) * (d.c-o.c) ) )); 
+}
+
+int dist( order& o,drone& d){
+	return dist(&d,&o);
+}
 
 int main(){
 	ios::sync_with_stdio(0);
