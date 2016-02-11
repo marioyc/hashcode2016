@@ -152,7 +152,6 @@ int main(){
 
               if(takes){
                 found = true;
-                dr[j].have -= d1 + d2 + 2;
                 dr[j].r = ord[i].r;
                 dr[j].c = ord[i].c;
                 found = true;
