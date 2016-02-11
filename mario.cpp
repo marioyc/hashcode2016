@@ -27,20 +27,23 @@ struct warehouse{
 struct order{
 	int id;
 	int r,c;
-	int p[MAXP],sump;
+	int p[MAXP],sump,notzero;
 
 	bool operator < (order X)const{
-		return sump < X.sump;
+		return notzero < X.notzero;
+		//return sump < X.sump;
 	}
 }ord[MAXC];
 
 struct drone{
 	int id;
 	int r,c,have,capacity;
+	int score;
 	//int p[MAXP];
 
 	bool operator < (drone X)const{
-		return have > X.have;
+		return score > X.score;
+		//return have > X.have;
 	}
 }dr[MAXD];
 
@@ -95,7 +98,13 @@ int main(){
 		//memset(dr[i].p,0,sizeof dr[i].p);
 	}
 
+	for(int i = 0;i < C;++i)
+		for(int j = 0;j < P;++j)
+			if(ord[i].p[j] > 0)
+				++ord[i].notzero;
+
 	sort(ord,ord + C);
+	//random_shuffle(ord,ord + C);
 
 	for(int i = 0;i < C;++i){
     int client = ord[i].id;
@@ -104,6 +113,9 @@ int main(){
     bool found = true;
 
     while(ord[i].sump > 0 && found){
+			for(int j = 0;j < D;++j)
+				dr[j].score = dr[j].have - 2 * (int)ceil(dist(dr[j].r,dr[j].c,ord[i].r,ord[i].c));
+
       sort(dr,dr + D);
 
       // TODO: producto que mas necesitas
@@ -121,7 +133,7 @@ int main(){
 				for(int k = 0;k < W;++k)
 					ware[k].distance = (int)ceil(dist(dr[j].r,dr[j].c,ware[k].r,ware[k].c)) + (int)ceil(dist(ware[k].r,ware[k].c,ord[i].r,ord[i].c));
 				sort(ware,ware + W);
-				
+
   			for(int k = 0;k < W && !found;++k){
           if(ware[k].p[cur] > 0){
             int d1 = (int)ceil(dist(dr[j].r,dr[j].c,ware[k].r,ware[k].c));
@@ -150,6 +162,7 @@ int main(){
                     cout << dr[j].id << " L " << ware[k].id << " " << id << " " << take << '\n';
                     v1.push_back(id);
                     v2.push_back(take);
+										//if(i < 10 && nitems == (notzero + D - 1) / D) break;
                   }
                 }
               }
