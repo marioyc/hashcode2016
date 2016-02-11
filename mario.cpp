@@ -111,13 +111,17 @@ int main(){
 
       found = false;
 
-      for(int k = 0;k < W;++k)
+      /*for(int k = 0;k < W;++k)
         ware[k].distance = (int)ceil(dist(ware[k].r,ware[k].c,ord[i].r,ord[i].c));
-      sort(ware,ware + W);
+      sort(ware,ware + W);*/
 
   		for(int j = 0;j < D && !found;++j){
         // TODO: combinar distancia y lo que transporta
         // TODO: ordenar warehouses por distancia
+				for(int k = 0;k < W;++k)
+					ware[k].distance = (int)ceil(dist(dr[j].r,dr[j].c,ware[k].r,ware[k].c)) + (int)ceil(dist(ware[k].r,ware[k].c,ord[i].r,ord[i].c));
+				sort(ware,ware + W);
+				
   			for(int k = 0;k < W && !found;++k){
           if(ware[k].p[cur] > 0){
             int d1 = (int)ceil(dist(dr[j].r,dr[j].c,ware[k].r,ware[k].c));
