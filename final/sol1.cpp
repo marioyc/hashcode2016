@@ -105,8 +105,10 @@ void update_sat(satellite &s){
 
 bool check_turn(collection &c, int turn){
   for(int i = 0;i < c.nr;++i){
-    if(turn >= c.r[i].first && turn <= c.r[i].second)
+    if(turn >= c.r[i].first && turn <= c.r[i].second){
+      //printf("found\n");
       return true;
+    }
   }
 
   return false;
@@ -115,14 +117,64 @@ bool check_turn(collection &c, int turn){
 bool can_reach(satellite &s, point &p, int &dx, int &dy){
   point cur = add(s.p,s.dx,s.dy);
 
-  int lx = s.p.x - s.w;
-  int rx = s.p.x + s.w;
-  int ly = s.p.y - s.w;
-  int ry = s.p.y + s.w;
+  int lx = s.p.x - s.d;
+  int rx = s.p.x + s.d;
+  int ly = s.p.y - s.d;
+  int ry = s.p.y + s.d;
 
-  if(p.x >= lx && p.x <= rx && p.y >= ly && p.y <= ry){
-    // return dx,dy
-    return true;
+  bool ok1 = false,ok2 = false;
+
+  if(p.x >= lx && p.x <= rx){
+    if(p.y >= ly && p.y <= ry){
+      ok1 = true;
+    }
+    if(p.y - 1296000 >= ly && p.y - 1296000 <= ry){
+      ok1 = true;
+    }
+    if(p.y + 1296000 >= ly && p.y + 1296000 <= ry){
+      ok1 = true;
+    }
+  }
+
+  if(ok1){
+    lx = cur.x - s.w;
+    rx = cur.x + s.w;
+    ly = cur.y - s.w;
+    ly = cur.y + s.w;
+
+    if(p.x >= lx && p.x <= rx){
+      dx = p.x - cur.x;
+
+      if(p.y >= ly && p.y <= ry){
+        dy = p.y - cur.y;
+        ok2 = true;
+      }
+      if(p.y - 1296000 >= ly && p.y - 1296000 <= ry){
+        dy = p.y - 1296000 - cur.y;
+        ok2 = true;
+      }
+      if(p.y + 1296000 >= ly && p.y + 1296000 <= ry){
+        dy = p.y + 1296000 - cur.y;
+        ok2 = true;
+      }
+    }
+
+    if(ok2){
+      assert(dx >= -s.w);
+      assert(dx <= s.w);
+      assert(dy >= -s.w);
+      assert(dy <= s.w);
+
+      s.dx += dx;
+      s.dy += dy;
+
+      assert(s.dx >= -s.d);
+      assert(s.dx <= s.d);
+      assert(s.dy >= -s.d);
+      assert(s.dy <= s.d);
+
+      return true;
+    }
   }
 
   return false;
