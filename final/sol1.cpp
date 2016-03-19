@@ -20,9 +20,12 @@ struct satellite{
   point p;
   int v,w,d;
   int dx,dy;
+  bool used;
+  int free_turns;
 
   satellite(){
     dx = dy = 0;
+    free_turns = 0;
   }
 }sat[MAXS];
 
@@ -38,8 +41,11 @@ struct collection{
   int value,nl,nr;
   vector<location> l;
   vector< pair<int, int> > r;
+  int cur_r;
 
-  collection(){}
+  collection(){
+    cur_r = 0;
+  }
 }col[MAXC];
 
 struct photo{
@@ -63,20 +69,20 @@ point add(point p, int dx, int dy){
   p.x += dx;
   p.y += dy;
 
-  if(p.x > 90 * 3600){
-    p.x = 180 * 3600 - p.x;
-    p.y = -180 * 3600 + p.y;
-  }else if(p.x < -90 * 3600){
-    p.x = - 180 * 3600 - p.x;
-    p.y = -180 * 3600 + p.y;
+  if(p.x > 324000){
+    p.x = 648000 - p.x;
+    p.y = -648000 + p.y;
+  }else if(p.x < -324000){
+    p.x = - 648000 - p.x;
+    p.y = -648000 + p.y;
   }
 
   fix_y(p.y);
 
-  assert(p.x <= 90 * 3600);
-  assert(p.x >= -90 * 3600);
-  assert(p.y >= -648000);
-  assert(p.y <= 647999);
+  //assert(p.x <= 90 * 3600);
+  //assert(p.x >= -90 * 3600);
+  //assert(p.y >= -648000);
+  //assert(p.y <= 647999);
 
   return p;
 }
@@ -85,32 +91,37 @@ void update_sat(satellite &s){
   s.p.x += s.v;
   s.p.y -= 15;
 
-  if(s.p.x > 90 * 3600){
-    s.p.x = 180 * 3600 - s.p.x;
-    s.p.y = -180 * 3600 + s.p.y;
+  if(s.p.x > 324000){
+    s.p.x = 648000 - s.p.x;
+    s.p.y = -648000 + s.p.y;
     s.v = -s.v;
-  }else if(s.p.x < -90 * 3600){
-    s.p.x = - 180 * 3600 - s.p.x;
-    s.p.y = -180 * 3600 + s.p.y;
+  }else if(s.p.x < -324000){
+    s.p.x = - 648000 - s.p.x;
+    s.p.y = -648000 + s.p.y;
     s.v = -s.v;
   }
 
   fix_y(s.p.y);
 
-  assert(s.p.x <= 90 * 3600);
-  assert(s.p.x >= -90 * 3600);
-  assert(s.p.y >= -648000);
-  assert(s.p.y <= 647999);
+  if(s.used) s.free_turns = 0;
+  else ++s.free_turns;
+
+  //assert(s.p.x <= 90 * 3600);
+  //assert(s.p.x >= -90 * 3600);
+  //assert(s.p.y >= -648000);
+  //assert(s.p.y <= 647999);
 }
 
 bool check_turn(collection &c, int turn){
-  for(int i = 0;i < c.nr;++i){
+  /*for(int i = 0;i < c.nr;++i){
     if(turn >= c.r[i].first && turn <= c.r[i].second){
       //printf("found\n");
       return true;
     }
-  }
-
+  }*/
+  if(c.cur_r == c.nr) return false;
+  if(turn > c.r[c.cur_r].second) ++c.cur_r;
+  if(turn >= c.r[c.cur_r].first && turn <= c.r[c.cur_r].second) return true;
   return false;
 }
 
@@ -137,10 +148,15 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
   }
 
   if(ok1){
-    lx = cur.x - s.w;
-    rx = cur.x + s.w;
-    ly = cur.y - s.w;
-    ry = cur.y + s.w;
+    int w;
+
+    if(s.w * s.free_turns >= s.d) w = s.d;
+    else w = s.w * s.free_turns;
+
+    lx = cur.x - w;
+    rx = cur.x + w;
+    ly = cur.y - w;
+    ry = cur.y + w;
 
     if(p.x >= lx && p.x <= rx){
       dx = p.x - cur.x;
@@ -160,15 +176,15 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
     }
 
     if(ok2){
-      assert(dx >= -s.w);
-      assert(dx <= s.w);
-      assert(dy >= -s.w);
+      assert(dx >= -w);
+      assert(dx <= w);
+      assert(dy >= -w);
 
       /*if(dy > s.w){
         printf("s.p = (%d, %d); (dx, dy) = (%d, %d); cur = (%d, %d); p = (%d, %d); s.d = %d; s.w = %d; (dx, dy) = (%d, %d)\n",s.p.x,s.p.y,s.dx,s.dy,cur.x,cur.y,p.x,p.y,s.d,s.w,dx,dy);
       }*/
 
-      assert(dy <= s.w);
+      assert(dy <= w);
 
       s.dx += dx;
       s.dy += dy;
@@ -231,16 +247,17 @@ int main(){
 
   for(int t = 0;t < T;++t){
     // Choose
-    memset(used_sat,false,sizeof used_sat);
-
+    //memset(used_sat,false,sizeof used_sat);
+    for(int i = 0;i < S;++i)
+      sat[i].used = false;
 
     for(int j = 0;j < C;++j){
       if(check_turn(col[j],t)){
         for(int i = 0;i < S;++i){
-          if(used_sat[i]) continue;
+          if(sat[i].used) continue;
           int ret = find_location(col[j],sat[i]);
           if(ret != -1){
-            used_sat[i] = true;
+            sat[i].used = true;
             vphotos.push_back(photo(col[j].l[ret].p,i,t));
           }
         }
