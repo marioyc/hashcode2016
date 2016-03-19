@@ -21,12 +21,22 @@ struct satellite{
   int v,w,d;
   int dx,dy;
 
-  satellite(){}
+  satellite(){
+    dx = dy = 0;
+  }
 }sat[MAXS];
+
+struct location{
+  point p;
+  bool done;
+
+  location(point _p):
+    p(_p), done(false){}
+};
 
 struct collection{
   int value,nl,nr;
-  vector<point> l;
+  vector<location> l;
   vector< pair<int, int> > r;
 
   collection(){}
@@ -108,9 +118,9 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
   int lx = s.p.x - s.w;
   int rx = s.p.x + s.w;
   int ly = s.p.y - s.w;
-  int ry = s.p.y - s.w;
+  int ry = s.p.y + s.w;
 
-  if(p.x >= lx && p.y <= rx){
+  if(p.x >= lx && p.x <= rx && p.y >= ly && p.y <= ry){
     // return dx,dy
     return true;
   }
@@ -121,8 +131,9 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
 int find_location(collection &c, satellite &s){
   for(int i = 0,dx,dy;i < c.nl;++i){
     //if(c.l[i].x == s.p.x && c.l[i].y == s.p.y)
-    if(can_reach(s,c.l[i],dx,dy)){
+    if(!c.l[i].done && can_reach(s,c.l[i].p,dx,dy)){
       // update dx,dy
+      c.l[i].done = true;
       return i;
     }
   }
@@ -149,7 +160,7 @@ int main(){
 
     for(int j = 0,x,y;j < col[i].nl;++j){
       scanf("%d %d",&x,&y);
-      col[i].l.push_back(point(x,y));
+      col[i].l.push_back(location(point(x,y)));
     }
 
     for(int j = 0,s,e;j < col[i].nr;++j){
@@ -173,7 +184,7 @@ int main(){
           int ret = find_location(col[j],sat[i]);
           if(ret != -1){
             used_sat[i] = true;
-            vphotos.push_back(photo(col[j].l[ret],i,t));
+            vphotos.push_back(photo(col[j].l[ret].p,i,t));
           }
         }
       }
