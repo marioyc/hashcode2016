@@ -5,8 +5,8 @@
 
 using namespace std;
 
-#define MAXS 100
-#define MAXC 10000
+#define MAXS 40
+#define MAXC 2048
 
 struct point{
   int x,y;
@@ -42,9 +42,15 @@ struct collection{
   vector<location> l;
   vector< pair<int, int> > r;
   int cur_r;
+  int cont_done;
 
   collection(){
     cur_r = 0;
+    cont_done = 0;
+  }
+
+  bool operator < (collection X)const{
+    return cont_done > X.cont_done;
   }
 }col[MAXC];
 
@@ -176,23 +182,23 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
     }
 
     if(ok2){
-      assert(dx >= -w);
-      assert(dx <= w);
-      assert(dy >= -w);
+      //assert(dx >= -w);
+      //assert(dx <= w);
+      //assert(dy >= -w);
 
       /*if(dy > s.w){
         printf("s.p = (%d, %d); (dx, dy) = (%d, %d); cur = (%d, %d); p = (%d, %d); s.d = %d; s.w = %d; (dx, dy) = (%d, %d)\n",s.p.x,s.p.y,s.dx,s.dy,cur.x,cur.y,p.x,p.y,s.d,s.w,dx,dy);
       }*/
 
-      assert(dy <= w);
+      //assert(dy <= w);
 
       s.dx += dx;
       s.dy += dy;
 
-      assert(s.dx >= -s.d);
-      assert(s.dx <= s.d);
-      assert(s.dy >= -s.d);
-      assert(s.dy <= s.d);
+      //assert(s.dx >= -s.d);
+      //assert(s.dx <= s.d);
+      //assert(s.dy >= -s.d);
+      //assert(s.dy <= s.d);
 
       return true;
     }
@@ -207,6 +213,7 @@ int find_location(collection &c, satellite &s){
     if(!c.l[i].done && can_reach(s,c.l[i].p,dx,dy)){
       // update dx,dy
       c.l[i].done = true;
+      c.cont_done++;
       return i;
     }
   }
@@ -243,7 +250,7 @@ int main(){
   }
 
   // Turn-loop
-  bool used_sat[MAXS];
+  //bool used_sat[MAXS];
 
   for(int t = 0;t < T;++t){
     // Choose
@@ -251,14 +258,17 @@ int main(){
     for(int i = 0;i < S;++i)
       sat[i].used = false;
 
+    sort(col,col + C);
+
     for(int j = 0;j < C;++j){
       if(check_turn(col[j],t)){
         for(int i = 0;i < S;++i){
-          if(sat[i].used) continue;
-          int ret = find_location(col[j],sat[i]);
-          if(ret != -1){
-            sat[i].used = true;
-            vphotos.push_back(photo(col[j].l[ret].p,i,t));
+          if(!sat[i].used){
+            int ret = find_location(col[j],sat[i]);
+            if(ret != -1){
+              sat[i].used = true;
+              vphotos.push_back(photo(col[j].l[ret].p,i,t));
+            }
           }
         }
       }
