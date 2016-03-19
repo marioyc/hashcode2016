@@ -140,7 +140,7 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
     lx = cur.x - s.w;
     rx = cur.x + s.w;
     ly = cur.y - s.w;
-    ly = cur.y + s.w;
+    ry = cur.y + s.w;
 
     if(p.x >= lx && p.x <= rx){
       dx = p.x - cur.x;
@@ -163,6 +163,11 @@ bool can_reach(satellite &s, point &p, int &dx, int &dy){
       assert(dx >= -s.w);
       assert(dx <= s.w);
       assert(dy >= -s.w);
+
+      /*if(dy > s.w){
+        printf("s.p = (%d, %d); (dx, dy) = (%d, %d); cur = (%d, %d); p = (%d, %d); s.d = %d; s.w = %d; (dx, dy) = (%d, %d)\n",s.p.x,s.p.y,s.dx,s.dy,cur.x,cur.y,p.x,p.y,s.d,s.w,dx,dy);
+      }*/
+
       assert(dy <= s.w);
 
       s.dx += dx;
