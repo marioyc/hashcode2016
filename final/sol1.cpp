@@ -49,9 +49,9 @@ struct collection{
     cont_done = 0;
   }
 
-  bool operator < (collection X)const{
+  /*bool operator < (collection X)const{
     return cont_done > X.cont_done;
-  }
+  }*/
 }col[MAXC];
 
 struct photo{
@@ -63,6 +63,19 @@ struct photo{
 
   void print(){
     printf("%d %d %d %d\n",p.x,p.y,t,id_sat);
+  }
+};
+
+struct aux_triple{
+  int id_col;
+  int id_l;
+  int cont_done;
+
+  aux_triple(int _id_col, int _id_l, int _cont_done):
+    id_col(_id_col), id_l(_id_l), cont_done(_cont_done){}
+
+  bool operator < (aux_triple X)const{
+    return cont_done > X.cont_done;
   }
 };
 
@@ -251,14 +264,17 @@ int main(){
 
   // Turn-loop
   //bool used_sat[MAXS];
+  vector<aux_triple> ok[MAXS];
 
   for(int t = 0;t < T;++t){
     // Choose
     //memset(used_sat,false,sizeof used_sat);
-    for(int i = 0;i < S;++i)
+    for(int i = 0;i < S;++i){
       sat[i].used = false;
+      ok[i].clear();
+    }
 
-    sort(col,col + C);
+    //sort(col,col + C);
 
     for(int j = 0;j < C;++j){
       if(check_turn(col[j],t)){
@@ -266,11 +282,20 @@ int main(){
           if(!sat[i].used){
             int ret = find_location(col[j],sat[i]);
             if(ret != -1){
-              sat[i].used = true;
-              vphotos.push_back(photo(col[j].l[ret].p,i,t));
+              ok[i].push_back(aux_triple(j,ret,col[j].cont_done));
+              //sat[i].used = true;
+              //vphotos.push_back(photo(col[j].l[ret].p,i,t));
             }
           }
         }
+      }
+    }
+
+    for(int i = 0;i < S;++i){
+      sort(ok[i].begin(),ok[i].end());
+      if(!ok[i].empty()){
+        sat[i].used = true;
+        vphotos.push_back(photo(col[ ok[i][0].id_col ].l[ ok[i][0].id_l ].p,i,t));
       }
     }
 
