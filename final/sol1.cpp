@@ -102,10 +102,29 @@ bool check_turn(collection &c, int turn){
   return false;
 }
 
+bool can_reach(satellite &s, point &p, int &dx, int &dy){
+  point cur = add(s.p,s.dx,s.dy);
+
+  int lx = s.p.x - s.w;
+  int rx = s.p.x + s.w;
+  int ly = s.p.y - s.w;
+  int ry = s.p.y - s.w;
+
+  if(p.x >= lx && p.y <= rx){
+    // return dx,dy
+    return true;
+  }
+
+  return false;
+}
+
 int find_location(collection &c, satellite &s){
-  for(int i = 0;i < c.nl;++i){
-    if(c.l[i].x == s.p.x && c.l[i].y == s.p.y)
+  for(int i = 0,dx,dy;i < c.nl;++i){
+    //if(c.l[i].x == s.p.x && c.l[i].y == s.p.y)
+    if(can_reach(s,c.l[i],dx,dy)){
+      // update dx,dy
       return i;
+    }
   }
 
   return -1;
@@ -140,17 +159,21 @@ int main(){
   }
 
   // Turn-loop
+  bool used_sat[MAXS];
 
   for(int t = 0;t < T;++t){
     // Choose
-    for(int i = 0;i < S;++i){
-      bool found = false;
+    memset(used_sat,false,sizeof used_sat);
 
-      for(int j = 0;j < C && !found;++j){
-        if(check_turn(col[j],t)){
+
+    for(int j = 0;j < C;++j){
+      if(check_turn(col[j],t)){
+        for(int i = 0;i < S;++i){
+          if(used_sat[i]) continue;
           int ret = find_location(col[j],sat[i]);
           if(ret != -1){
-            vphotos.push_back(photo(sat[i].p,i,t));
+            used_sat[i] = true;
+            vphotos.push_back(photo(col[j].l[ret],i,t));
           }
         }
       }
